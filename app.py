@@ -1,13 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
-from PIL import Image, ImageTk
 
 from database import inicializar_db
 from ui.menu_ui import crear_frame_menu
 from ui.inventario_ui import crear_frame_inventario
 from ui.ventas_ui import crear_frame_ventas
 
+# Inicializar base de datos
 inicializar_db()
+
 # ---------------- VENTANA ---------------- #
 
 ventana = tk.Tk()
@@ -21,23 +22,22 @@ except:
 
 # ---------------- FUENTE ---------------- #
 
-FONT = "Ubuntu"  # Puedes cambiar a "Inter" si la tienes
+FONT = "Ubuntu"
 
 # ---------------- COLORES ---------------- #
 
 COLOR_SIDEBAR = "#1f2022"
-COLOR_SIDEBAR_HOVER = "#1f2022"
-COLOR_SIDEBAR_ACTIVE = "#1f2022"
+COLOR_SIDEBAR_HOVER = "#2a2b2e"
+COLOR_SIDEBAR_ACTIVE = "#2a2b2e"
 COLOR_ACCENT = "#ffffff"
 COLOR_TEXT = "#e5e7eb"
 COLOR_BG = "#f8fafc"
 
-# ---------------- ESTILOS TTK ---------------- #
+# ---------------- ESTILOS ---------------- #
 
 style = ttk.Style()
 style.theme_use("clam")
 
-# TREEVIEW
 style.configure(
     "Treeview",
     background="white",
@@ -60,20 +60,8 @@ style.map(
     foreground=[("selected", "white")]
 )
 
-# ENTRY
-style.configure(
-    "TEntry",
-    fieldbackground="white",
-    foreground="#111827"
-)
-
-# COMBOBOX
-style.configure(
-    "TCombobox",
-    fieldbackground="white",
-    background="white",
-    foreground="#111827"
-)
+style.configure("TEntry", fieldbackground="white", foreground="#111827")
+style.configure("TCombobox", fieldbackground="white", foreground="#111827")
 
 # ---------------- LAYOUT ---------------- #
 
@@ -83,7 +71,6 @@ contenedor.pack(fill="both", expand=True)
 contenedor.grid_rowconfigure(0, weight=1)
 contenedor.grid_columnconfigure(1, weight=1)
 
-# SIDEBAR MÁS ANCHO
 sidebar = tk.Frame(contenedor, bg=COLOR_SIDEBAR, width=380)
 sidebar.grid(row=0, column=0, sticky="ns")
 sidebar.grid_propagate(False)
@@ -104,34 +91,23 @@ for f in (frame_menu, frame_inv, frame_ventas):
 
 def mostrar(frame):
     frame.tkraise()
-
     if hasattr(frame, "refrescar"):
         frame.refrescar()
 
-# ---------------- SIDEBAR UI ---------------- #
+# ---------------- HEADER ---------------- #
 
 header = tk.Frame(sidebar, bg=COLOR_SIDEBAR)
 header.pack(fill="x", pady=(25, 10), padx=20)
 
-tk.Label(
-    header,
-    text="PAMICELL",
-    bg=COLOR_SIDEBAR,
-    fg=COLOR_ACCENT,
-    font=(FONT, 24, "bold")
-).pack(anchor="w")
+tk.Label(header, text="PAMICELL", bg=COLOR_SIDEBAR, fg=COLOR_ACCENT,
+         font=(FONT, 24, "bold")).pack(anchor="w")
 
-tk.Label(
-    header,
-    text="Sistema de ventas",
-    bg=COLOR_SIDEBAR,
-    fg="#94a3b8",
-    font=(FONT, 11)
-).pack(anchor="w", pady=(5, 0))
+tk.Label(header, text="Sistema de ventas", bg=COLOR_SIDEBAR,
+         fg="#94a3b8", font=(FONT, 11)).pack(anchor="w", pady=(5, 0))
 
 tk.Frame(sidebar, height=1, bg="#1e293b").pack(fill="x", padx=20, pady=15)
 
-# ---------------- BOTONES SIDEBAR ---------------- #
+# ---------------- BOTONES ---------------- #
 
 botones = []
 indicadores = []
@@ -147,7 +123,7 @@ def activar(btn, indicador):
 
 def crear_boton(texto, comando):
     cont = tk.Frame(sidebar, bg=COLOR_SIDEBAR)
-    cont.pack(fill="x")  # <- sin padding
+    cont.pack(fill="x")
 
     indicador = tk.Frame(cont, width=5, bg=COLOR_SIDEBAR)
     indicador.pack(side="left", fill="y")
@@ -163,7 +139,7 @@ def crear_boton(texto, comando):
         pady=16,
         cursor="hand2"
     )
-    btn.pack(side="left", fill="both", expand=True)  # <- CLAVE
+    btn.pack(side="left", fill="both", expand=True)
 
     def enter(e):
         if btn["bg"] != COLOR_SIDEBAR_ACTIVE:

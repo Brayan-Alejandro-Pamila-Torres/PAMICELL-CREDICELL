@@ -1,7 +1,12 @@
 import sqlite3
+import os
+
+# ---------------- CONEXIÓN ---------------- #
 
 def conectar():
-    return sqlite3.connect("inventario.db")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, "inventario.db")
+    return sqlite3.connect(db_path)
 
 
 # ---------------- PRODUCTOS ---------------- #
