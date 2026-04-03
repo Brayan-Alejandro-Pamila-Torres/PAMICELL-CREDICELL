@@ -108,6 +108,13 @@ def crear_frame_inventario(parent):
     crear_label("Almacenamiento", 4, 0)
     combo_alm.grid(row=5, column=0, padx=10, pady=(0, 8), sticky="ew")
 
+    # NUEVO CAMPO STOCK
+    crear_label("Stock", 4, 1)
+
+    entry_stock = ttk.Entry(form, width=24)
+    entry_stock.insert(0, "1")
+    entry_stock.grid(row=5, column=1, padx=10, pady=(0, 8), sticky="ew")
+    
     barra_acciones = tk.Frame(card_form, bg="white")
     barra_acciones.pack(fill="x", padx=20, pady=(0, 18))
 
@@ -147,7 +154,7 @@ def crear_frame_inventario(parent):
     tabla_wrap = tk.Frame(card_tabla, bg="white")
     tabla_wrap.pack(fill="both", expand=True, padx=20, pady=(0, 20))
 
-    columnas = ("ID", "FECHA", "PROVEEDOR", "IMEI", "MODELO", "PRECIO", "RAM", "ALM", "ESTATUS")
+    columnas = ("ID", "FECHA", "PROVEEDOR", "IMEI", "MODELO", "PRECIO", "RAM", "ALM", "STOCK", "ESTATUS")
 
     tabla = ttk.Treeview(tabla_wrap, columns=columnas, show="headings")
 
@@ -160,6 +167,7 @@ def crear_frame_inventario(parent):
         "PRECIO": 110,
         "RAM": 90,
         "ALM": 100,
+        "STOCK": 60,
         "ESTATUS": 120
     }
 
@@ -189,6 +197,8 @@ def crear_frame_inventario(parent):
         entry_precio.delete(0, tk.END)
         entry_fecha.delete(0, tk.END)
         entry_fecha.insert(0, datetime.now().strftime("%d/%m/%Y"))
+        entry_stock.delete(0, tk.END)
+        entry_stock.insert(0, "1")
         proveedor.set("GAMA PLUS")
         ram.set("4GB")
         almacenamiento.set("64GB")
@@ -204,7 +214,7 @@ def crear_frame_inventario(parent):
             tabla.insert(
                 "",
                 tk.END,
-                values=(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8])
+                values=(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9])
             )
 
     def guardar():
@@ -220,6 +230,8 @@ def crear_frame_inventario(parent):
             precio = float(entry_precio.get())
 
             if producto_editando_id["valor"] is None:
+                stock = int(entry_stock.get())
+                estatus = "DISPONIBLE" if stock > 0 else "AGOTADO"
                 data = {
                     "fecha": entry_fecha.get(),
                     "proveedor": proveedor.get(),
@@ -227,7 +239,9 @@ def crear_frame_inventario(parent):
                     "modelo": entry_modelo.get(),
                     "precio": precio,
                     "ram": ram.get(),
-                    "alm": almacenamiento.get()
+                    "alm": almacenamiento.get(),
+                    "stock": stock,
+                    "estatus": estatus
                 }
 
                 res = guardar_producto(data)
@@ -415,5 +429,9 @@ def crear_frame_inventario(parent):
     entry_buscar.bind("<KeyRelease>", buscar)
 
     cargar_tabla()
+    def refrescar():
+        cargar_tabla()
+
+    frame.refrescar = refrescar
 
     return frame

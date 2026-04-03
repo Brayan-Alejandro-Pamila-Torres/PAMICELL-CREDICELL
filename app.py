@@ -1,13 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
-from database import crear_tabla
+from PIL import Image, ImageTk
+
+from database import inicializar_db
 from ui.menu_ui import crear_frame_menu
 from ui.inventario_ui import crear_frame_inventario
 from ui.ventas_ui import crear_frame_ventas
-from PIL import Image, ImageTk
 
-crear_tabla()
-
+inicializar_db()
 # ---------------- VENTANA ---------------- #
 
 ventana = tk.Tk()
@@ -104,6 +104,9 @@ for f in (frame_menu, frame_inv, frame_ventas):
 
 def mostrar(frame):
     frame.tkraise()
+
+    if hasattr(frame, "refrescar"):
+        frame.refrescar()
 
 # ---------------- SIDEBAR UI ---------------- #
 
