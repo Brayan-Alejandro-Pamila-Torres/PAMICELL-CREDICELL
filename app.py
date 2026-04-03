@@ -1,297 +1,195 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
+from database import crear_tabla
+from ui.menu_ui import crear_frame_menu
+from ui.inventario_ui import crear_frame_inventario
+from ui.ventas_ui import crear_frame_ventas
 from PIL import Image, ImageTk
-from datetime import datetime
-from database import conectar, crear_tabla
 
 crear_tabla()
 
-# ---------------- FUNCIONES ---------------- #
-
-def mostrar_frame(frame):
-    frame.tkraise()
-
-def guardar_producto():
-    try:
-        fecha = entry_fecha.get()
-        prov = valor_proveedor.get()
-        imei = entry_imei.get()
-        mod = entry_modelo.get()
-        precio_texto = entry_precio_c.get()
-        ram = valor_ram.get()
-        alm = valor_almacenamiento.get()
-        est = "DISPONIBLE"
-
-        if not imei or not mod or not precio_texto:
-            messagebox.showwarning("Atención", "IMEI, Modelo y Precio son obligatorios.")
-            return
-
-        if not imei.isdigit() or len(imei) != 15:
-            messagebox.showwarning("Error", "El IMEI debe tener 15 dígitos.")
-            return
-
-        conn = conectar()
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM productos WHERE imei = ?", (imei,))
-        if cursor.fetchone()[0] > 0:
-            conn.close()
-            messagebox.showerror("Error", "IMEI ya registrado")
-            return
-
-        precio = float(precio_texto)
-
-        cursor.execute("""
-            INSERT INTO productos 
-            (fecha, proveedor, imei, modelo, precio_compra, ram, almacenamiento, estatus) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (fecha, prov, imei, mod, precio, ram, alm, est))
-
-        conn.commit()
-        conn.close()
-
-        messagebox.showinfo("Éxito", "Producto guardado")
-        limpiar_campos()
-        mostrar_productos()
-
-    except ValueError:
-        messagebox.showerror("Error", "Precio inválido")
-
-def mostrar_productos():
-    for fila in tabla.get_children():
-        tabla.delete(fila)
-
-    conn = conectar()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM productos")
-    for producto in cursor.fetchall():
-        tabla.insert("", tk.END, values=producto)
-    conn.close()
-
-def limpiar_campos():
-    entry_imei.delete(0, tk.END)
-    entry_modelo.delete(0, tk.END)
-    entry_precio_c.delete(0, tk.END)
-    entry_fecha.delete(0, tk.END)
-    entry_fecha.insert(0, datetime.now().strftime("%d/%m/%Y"))
-
-# ---------------- GUI ---------------- #
+# ---------------- VENTANA ---------------- #
 
 ventana = tk.Tk()
 ventana.title("CREDICELL & PAMICELL")
+ventana.minsize(1200, 750)
 
 try:
     ventana.state("zoomed")
 except:
-    ventana.attributes('-zoomed', True)
+    ventana.attributes("-zoomed", True)
 
-# ---- estilos ----
+# ---------------- FUENTE ---------------- #
+
+FONT = "Ubuntu"  # Puedes cambiar a "Inter" si la tienes
+
+# ---------------- COLORES ---------------- #
+
+COLOR_SIDEBAR = "#1f2022"
+COLOR_SIDEBAR_HOVER = "#1f2022"
+COLOR_SIDEBAR_ACTIVE = "#1f2022"
+COLOR_ACCENT = "#ffffff"
+COLOR_TEXT = "#e5e7eb"
+COLOR_BG = "#f8fafc"
+
+# ---------------- ESTILOS TTK ---------------- #
+
 style = ttk.Style()
 style.theme_use("clam")
-style.configure("TButton", font=("Segoe UI", 11), padding=10)
-style.configure("Treeview", font=("Segoe UI", 10), rowheight=28)
-style.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"))
 
-# ---- layout ----
-contenedor = tk.Frame(ventana)
+# TREEVIEW
+style.configure(
+    "Treeview",
+    background="white",
+    foreground="#111827",
+    rowheight=30,
+    fieldbackground="white",
+    bordercolor="#e5e7eb"
+)
+
+style.configure(
+    "Treeview.Heading",
+    background="#0f172a",
+    foreground="white",
+    font=(FONT, 10, "bold")
+)
+
+style.map(
+    "Treeview",
+    background=[("selected", "#2563eb")],
+    foreground=[("selected", "white")]
+)
+
+# ENTRY
+style.configure(
+    "TEntry",
+    fieldbackground="white",
+    foreground="#111827"
+)
+
+# COMBOBOX
+style.configure(
+    "TCombobox",
+    fieldbackground="white",
+    background="white",
+    foreground="#111827"
+)
+
+# ---------------- LAYOUT ---------------- #
+
+contenedor = tk.Frame(ventana, bg=COLOR_BG)
 contenedor.pack(fill="both", expand=True)
 
 contenedor.grid_rowconfigure(0, weight=1)
 contenedor.grid_columnconfigure(1, weight=1)
 
-# ---------------- SIDEBAR (APP REAL) ---------------- #
-
-COLOR_BG = "#111417"
-COLOR_HOVER = "#1f2a33"
-COLOR_ACTIVE = "#2f3640"
-COLOR_ACCENT = "#f1c40f"
-COLOR_TEXT = "#ecf0f1"
-
-sidebar = tk.Frame(contenedor, bg=COLOR_BG, width=280)
+# SIDEBAR MÁS ANCHO
+sidebar = tk.Frame(contenedor, bg=COLOR_SIDEBAR, width=380)
 sidebar.grid(row=0, column=0, sticky="ns")
-sidebar.grid_propagate(False)  # 🔥 importante para respetar ancho
+sidebar.grid_propagate(False)
 
-contenido = tk.Frame(contenedor)
+contenido = tk.Frame(contenedor, bg=COLOR_BG)
 contenido.grid(row=0, column=1, sticky="nsew")
 contenido.grid_rowconfigure(0, weight=1)
 contenido.grid_columnconfigure(0, weight=1)
 
-# Header sidebar
-header_sb = tk.Frame(sidebar, bg=COLOR_BG)
-header_sb.pack(fill="x", pady=(20, 10))
+# ---------------- FRAMES ---------------- #
 
-tk.Label(header_sb, text="PAMICELL",
-         bg=COLOR_BG, fg=COLOR_ACCENT,
-         font=("Segoe UI", 18, "bold")).pack(anchor="w", padx=20)
+frame_menu = crear_frame_menu(contenido)
+frame_inv = crear_frame_inventario(contenido)
+frame_ventas = crear_frame_ventas(contenido)
 
-tk.Label(header_sb, text="Sistema",
-         bg=COLOR_BG, fg="#7f8c8d",
-         font=("Segoe UI", 10)).pack(anchor="w", padx=20, pady=(2, 0))
+for f in (frame_menu, frame_inv, frame_ventas):
+    f.grid(row=0, column=0, sticky="nsew")
 
-# divisor
-tk.Frame(sidebar, height=1, bg="#2c3e50").pack(fill="x", padx=15, pady=10)
+def mostrar(frame):
+    frame.tkraise()
 
-# --- botones con indicador activo ---
-botones_sidebar = []
+# ---------------- SIDEBAR UI ---------------- #
+
+header = tk.Frame(sidebar, bg=COLOR_SIDEBAR)
+header.pack(fill="x", pady=(25, 10), padx=20)
+
+tk.Label(
+    header,
+    text="PAMICELL",
+    bg=COLOR_SIDEBAR,
+    fg=COLOR_ACCENT,
+    font=(FONT, 24, "bold")
+).pack(anchor="w")
+
+tk.Label(
+    header,
+    text="Sistema de ventas",
+    bg=COLOR_SIDEBAR,
+    fg="#94a3b8",
+    font=(FONT, 11)
+).pack(anchor="w", pady=(5, 0))
+
+tk.Frame(sidebar, height=1, bg="#1e293b").pack(fill="x", padx=20, pady=15)
+
+# ---------------- BOTONES SIDEBAR ---------------- #
+
+botones = []
 indicadores = []
 
-def activar_boton(btn, ind):
-    for b in botones_sidebar:
-        b.config(bg=COLOR_BG)
+def activar(btn, indicador):
+    for b in botones:
+        b.config(bg=COLOR_SIDEBAR, fg=COLOR_TEXT)
     for i in indicadores:
-        i.config(bg=COLOR_BG)
+        i.config(bg=COLOR_SIDEBAR)
 
-    btn.config(bg=COLOR_ACTIVE)
-    ind.config(bg=COLOR_ACCENT)
+    btn.config(bg=COLOR_SIDEBAR_ACTIVE, fg="white")
+    indicador.config(bg=COLOR_ACCENT)
 
-def hover_in(e):
-    if e.widget["bg"] != COLOR_ACTIVE:
-        e.widget.config(bg=COLOR_HOVER)
+def crear_boton(texto, comando):
+    cont = tk.Frame(sidebar, bg=COLOR_SIDEBAR)
+    cont.pack(fill="x")  # <- sin padding
 
-def hover_out(e):
-    if e.widget["bg"] != COLOR_ACTIVE:
-        e.widget.config(bg=COLOR_BG)
-
-def boton_sidebar(texto, comando):
-    cont = tk.Frame(sidebar, bg=COLOR_BG)
-    cont.pack(fill="x")
-
-    indicador = tk.Frame(cont, width=4, bg=COLOR_BG)
+    indicador = tk.Frame(cont, width=5, bg=COLOR_SIDEBAR)
     indicador.pack(side="left", fill="y")
 
-    btn = tk.Label(cont,
-                   text="   " + texto,
-                   bg=COLOR_BG,
-                   fg=COLOR_TEXT,
-                   font=("Segoe UI", 11),
-                   anchor="w",
-                   padx=20,
-                   pady=12,
-                   cursor="hand2")
-    btn.pack(fill="x")
+    btn = tk.Label(
+        cont,
+        text="   " + texto,
+        bg=COLOR_SIDEBAR,
+        fg=COLOR_TEXT,
+        font=(FONT, 13, "bold"),
+        anchor="w",
+        padx=25,
+        pady=16,
+        cursor="hand2"
+    )
+    btn.pack(side="left", fill="both", expand=True)  # <- CLAVE
 
-    btn.bind("<Enter>", hover_in)
-    btn.bind("<Leave>", hover_out)
+    def enter(e):
+        if btn["bg"] != COLOR_SIDEBAR_ACTIVE:
+            btn.config(bg=COLOR_SIDEBAR_HOVER)
 
-    def click():
-        activar_boton(btn, indicador)
+    def leave(e):
+        if btn["bg"] != COLOR_SIDEBAR_ACTIVE:
+            btn.config(bg=COLOR_SIDEBAR)
+
+    def click(e):
+        activar(btn, indicador)
         comando()
 
-    btn.bind("<Button-1>", lambda e: click())
+    btn.bind("<Enter>", enter)
+    btn.bind("<Leave>", leave)
+    btn.bind("<Button-1>", click)
 
-    botones_sidebar.append(btn)
+    botones.append(btn)
     indicadores.append(indicador)
 
     return btn, indicador
 
-# botones
-btn_inicio, ind_inicio = boton_sidebar("🏠  Inicio", lambda: mostrar_frame(frame_menu))
-btn_inv, ind_inv = boton_sidebar("📦  Inventario", lambda: mostrar_frame(frame_inventario))
-btn_ventas, ind_ventas = boton_sidebar("💰  Ventas", lambda: mostrar_frame(frame_ventas))
+btn_inicio, ind1 = crear_boton("Inicio", lambda: mostrar(frame_menu))
+btn_inv, ind2 = crear_boton("Inventario", lambda: mostrar(frame_inv))
+btn_ventas, ind3 = crear_boton("Ventas", lambda: mostrar(frame_ventas))
 
-# ---------------- FRAMES ---------------- #
+# ---------------- INICIO ---------------- #
 
-frame_menu = tk.Frame(contenido, bg="#f5f6fa")
-frame_inventario = tk.Frame(contenido)
-frame_ventas = tk.Frame(contenido)
-
-for frame in (frame_menu, frame_inventario, frame_ventas):
-    frame.grid(row=0, column=0, sticky="nsew")
-
-# ---------------- MENU ---------------- #
-
-contenedor_menu = tk.Frame(frame_menu, bg="#f5f6fa")
-contenedor_menu.pack(expand=True)
-
-try:
-    img_logo = Image.open("logo.jpeg").resize((180, 180))
-    logo = ImageTk.PhotoImage(img_logo)
-    tk.Label(contenedor_menu, image=logo, bg="#f5f6fa").pack(pady=10)
-except:
-    tk.Label(contenedor_menu, text="LOGO").pack()
-
-tk.Label(contenedor_menu, text="CREDICELL & PAMICELL",
-         font=("Segoe UI", 26, "bold"),
-         bg="#f5f6fa").pack()
-
-tk.Label(contenedor_menu,
-         text="Sistema Integral de Ventas e Inventario",
-         font=("Segoe UI", 12),
-         bg="#f5f6fa", fg="#666").pack(pady=5)
-
-# ---------------- INVENTARIO ---------------- #
-
-header = tk.Frame(frame_inventario, bg="#2f3640", height=60)
-header.pack(fill="x")
-
-tk.Label(header, text="Gestión de Inventario",
-         bg="#2f3640", fg="white",
-         font=("Segoe UI", 16, "bold")).pack(pady=10)
-
-frame_form = tk.Frame(frame_inventario, bg="white", bd=1, relief="solid")
-frame_form.pack(pady=15, padx=30, fill="x")
-
-opciones_prov = ["GAMA PLUS", "SMART SHOP", "NANO SHOP", "TELESISTEM"]
-valor_proveedor = tk.StringVar(value=opciones_prov[0])
-
-opciones_ram = ["4GB", "8GB", "16GB"]
-valor_ram = tk.StringVar(value=opciones_ram[0])
-
-opciones_alm = ["64GB", "128GB", "256GB"]
-valor_almacenamiento = tk.StringVar(value=opciones_alm[0])
-
-tk.Label(frame_form, text="Fecha").grid(row=0, column=0, padx=5, pady=5)
-entry_fecha = tk.Entry(frame_form)
-entry_fecha.grid(row=0, column=1)
-entry_fecha.insert(0, datetime.now().strftime("%d/%m/%Y"))
-
-tk.Label(frame_form, text="Proveedor").grid(row=0, column=2)
-tk.OptionMenu(frame_form, valor_proveedor, *opciones_prov).grid(row=0, column=3)
-
-tk.Label(frame_form, text="IMEI").grid(row=1, column=0)
-entry_imei = tk.Entry(frame_form)
-entry_imei.grid(row=1, column=1)
-
-tk.Label(frame_form, text="Modelo").grid(row=1, column=2)
-entry_modelo = tk.Entry(frame_form)
-entry_modelo.grid(row=1, column=3)
-
-tk.Label(frame_form, text="Precio").grid(row=2, column=0)
-entry_precio_c = tk.Entry(frame_form)
-entry_precio_c.grid(row=2, column=1)
-
-tk.Label(frame_form, text="RAM").grid(row=2, column=2)
-tk.OptionMenu(frame_form, valor_ram, *opciones_ram).grid(row=2, column=3)
-
-tk.Label(frame_form, text="Almacenamiento").grid(row=3, column=0)
-tk.OptionMenu(frame_form, valor_almacenamiento, *opciones_alm).grid(row=3, column=1)
-
-ttk.Button(frame_inventario, text="REGISTRAR EQUIPO", command=guardar_producto).pack(pady=10)
-
-frame_tabla = tk.Frame(frame_inventario)
-frame_tabla.pack(padx=30, fill="both", expand=True)
-
-columnas = ("ID", "FECHA", "PROVEEDOR", "IMEI", "MODELO", "PRECIO", "RAM", "ALM", "ESTATUS")
-tabla = ttk.Treeview(frame_tabla, columns=columnas, show="headings")
-
-for col in columnas:
-    tabla.heading(col, text=col)
-    tabla.column(col, anchor="center", width=120)
-
-scroll = ttk.Scrollbar(frame_tabla, command=tabla.yview)
-tabla.configure(yscroll=scroll.set)
-
-tabla.pack(side="left", fill="both", expand=True)
-scroll.pack(side="right", fill="y")
-
-# ---------------- VENTAS ---------------- #
-
-tk.Label(frame_ventas, text="Módulo de Ventas",
-         font=("Segoe UI", 20)).pack(pady=20)
-
-# ---------------- START ---------------- #
-
-mostrar_productos()
-mostrar_frame(frame_menu)
-activar_boton(btn_inicio, ind_inicio)
+mostrar(frame_menu)
+activar(btn_inicio, ind1)
 
 ventana.mainloop()
