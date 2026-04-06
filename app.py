@@ -1,223 +1,174 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
-from database import conectar, crear_tabla
+from tkinter import ttk
 
-crear_tabla()
+from database import inicializar_db
+from ui.menu_ui import crear_frame_menu
+from ui.inventario_ui import crear_frame_inventario
+from ui.ventas_ui import crear_frame_ventas
 
-# ---------------- FUNCIONES ---------------- #
+# Inicializar base de datos
+inicializar_db()
 
-def mostrar_frame(frame):
-    frame.tkraise()
-
-def guardar_producto():
-
-    try:
-        nombre = entry_nombre.get()
-        marca = entry_marca.get()
-        modelo = entry_modelo.get()
-        capacidad = entry_capacidad.get()
-        color = entry_color.get()
-        precio = float(entry_precio.get())
-        stock = int(entry_stock.get())
-
-        conn = conectar()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-        INSERT INTO productos
-        (nombre, marca, modelo, capacidad, color, precio, stock)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,
-        (nombre, marca, modelo, capacidad, color, precio, stock))
-
-        conn.commit()
-        conn.close()
-
-        messagebox.showinfo("Éxito", "Teléfono agregado al inventario")
-
-        limpiar_campos()
-        mostrar_productos()
-
-    except:
-        messagebox.showerror("Error", "Datos inválidos")
-
-
-def mostrar_productos():
-
-    for fila in tabla.get_children():
-        tabla.delete(fila)
-
-    conn = conectar()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM productos")
-
-    for producto in cursor.fetchall():
-        tabla.insert("", tk.END, values=producto)
-
-    conn.close()
-
-
-def limpiar_campos():
-
-    entry_nombre.delete(0, tk.END)
-    entry_marca.delete(0, tk.END)
-    entry_modelo.delete(0, tk.END)
-    entry_capacidad.delete(0, tk.END)
-    entry_color.delete(0, tk.END)
-    entry_precio.delete(0, tk.END)
-    entry_stock.delete(0, tk.END)
-
-
-# ---------------- VENTANA PRINCIPAL ---------------- #
+# ---------------- VENTANA ---------------- #
 
 ventana = tk.Tk()
-ventana.title("Sistema Credicell & Pamicell")
-ventana.geometry("850x600")
+ventana.title("CREDICELL & PAMICELL")
+ventana.minsize(1200, 750)
 
-contenedor = tk.Frame(ventana)
+try:
+    ventana.state("zoomed")
+except:
+    ventana.attributes("-zoomed", True)
+
+# ---------------- FUENTE ---------------- #
+
+FONT = "Ubuntu"
+
+# ---------------- COLORES ---------------- #
+
+COLOR_SIDEBAR = "#1f2022"
+COLOR_SIDEBAR_HOVER = "#2a2b2e"
+COLOR_SIDEBAR_ACTIVE = "#2a2b2e"
+COLOR_ACCENT = "#ffffff"
+COLOR_TEXT = "#e5e7eb"
+COLOR_BG = "#f8fafc"
+
+# ---------------- ESTILOS ---------------- #
+
+style = ttk.Style()
+style.theme_use("clam")
+
+style.configure(
+    "Treeview",
+    background="white",
+    foreground="#111827",
+    rowheight=30,
+    fieldbackground="white",
+    bordercolor="#e5e7eb"
+)
+
+style.configure(
+    "Treeview.Heading",
+    background="#0f172a",
+    foreground="white",
+    font=(FONT, 10, "bold")
+)
+
+style.map(
+    "Treeview",
+    background=[("selected", "#2563eb")],
+    foreground=[("selected", "white")]
+)
+
+style.configure("TEntry", fieldbackground="white", foreground="#111827")
+style.configure("TCombobox", fieldbackground="white", foreground="#111827")
+
+# ---------------- LAYOUT ---------------- #
+
+contenedor = tk.Frame(ventana, bg=COLOR_BG)
 contenedor.pack(fill="both", expand=True)
 
-frame_menu = tk.Frame(contenedor)
-frame_inventario = tk.Frame(contenedor)
-frame_ventas = tk.Frame(contenedor)
+contenedor.grid_rowconfigure(0, weight=1)
+contenedor.grid_columnconfigure(1, weight=1)
 
-for frame in (frame_menu, frame_inventario, frame_ventas):
-    frame.grid(row=0, column=0, sticky="nsew")
+sidebar = tk.Frame(contenedor, bg=COLOR_SIDEBAR, width=380)
+sidebar.grid(row=0, column=0, sticky="ns")
+sidebar.grid_propagate(False)
 
-# ---------------- MENU PRINCIPAL ---------------- #
+contenido = tk.Frame(contenedor, bg=COLOR_BG)
+contenido.grid(row=0, column=1, sticky="nsew")
+contenido.grid_rowconfigure(0, weight=1)
+contenido.grid_columnconfigure(0, weight=1)
 
-titulo = tk.Label(
-    frame_menu,
-    text="Sistema Credicell & Pamicell",
-    font=("Arial", 24)
-)
-titulo.pack(pady=50)
+# ---------------- FRAMES ---------------- #
 
-boton_inventario = tk.Button(
-    frame_menu,
-    text="INVENTARIO",
-    font=("Arial", 16),
-    width=20,
-    height=2,
-    command=lambda: mostrar_frame(frame_inventario)
-)
-boton_inventario.pack(pady=20)
+frame_menu = crear_frame_menu(contenido)
+frame_inv = crear_frame_inventario(contenido)
+frame_ventas = crear_frame_ventas(contenido)
 
-boton_ventas = tk.Button(
-    frame_menu,
-    text="VENTAS",
-    font=("Arial", 16),
-    width=20,
-    height=2,
-    command=lambda: mostrar_frame(frame_ventas)
-)
-boton_ventas.pack(pady=20)
+for f in (frame_menu, frame_inv, frame_ventas):
+    f.grid(row=0, column=0, sticky="nsew")
 
-# ---------------- MODULO INVENTARIO ---------------- #
+def mostrar(frame):
+    frame.tkraise()
+    if hasattr(frame, "refrescar"):
+        frame.refrescar()
 
-titulo_inv = tk.Label(
-    frame_inventario,
-    text="Control de Inventario",
-    font=("Arial", 18)
-)
-titulo_inv.pack(pady=10)
+# ---------------- HEADER ---------------- #
 
-frame_form = tk.LabelFrame(frame_inventario, text="Alta de Teléfono")
-frame_form.pack(pady=10, padx=10, fill="x")
+header = tk.Frame(sidebar, bg=COLOR_SIDEBAR)
+header.pack(fill="x", pady=(25, 10), padx=20)
 
-tk.Label(frame_form, text="Nombre").grid(row=0, column=0, padx=5, pady=5)
-entry_nombre = tk.Entry(frame_form)
-entry_nombre.grid(row=0, column=1)
+tk.Label(header, text="PAMICELL", bg=COLOR_SIDEBAR, fg=COLOR_ACCENT,
+         font=(FONT, 24, "bold")).pack(anchor="w")
 
-tk.Label(frame_form, text="Marca").grid(row=1, column=0, padx=5, pady=5)
-entry_marca = tk.Entry(frame_form)
-entry_marca.grid(row=1, column=1)
+tk.Label(header, text="Sistema de ventas", bg=COLOR_SIDEBAR,
+         fg="#94a3b8", font=(FONT, 11)).pack(anchor="w", pady=(5, 0))
 
-tk.Label(frame_form, text="Modelo").grid(row=2, column=0, padx=5, pady=5)
-entry_modelo = tk.Entry(frame_form)
-entry_modelo.grid(row=2, column=1)
+tk.Frame(sidebar, height=1, bg="#1e293b").pack(fill="x", padx=20, pady=15)
 
-tk.Label(frame_form, text="Capacidad").grid(row=3, column=0, padx=5, pady=5)
-entry_capacidad = tk.Entry(frame_form)
-entry_capacidad.grid(row=3, column=1)
+# ---------------- BOTONES ---------------- #
 
-tk.Label(frame_form, text="Color").grid(row=4, column=0, padx=5, pady=5)
-entry_color = tk.Entry(frame_form)
-entry_color.grid(row=4, column=1)
+botones = []
+indicadores = []
 
-tk.Label(frame_form, text="Precio contado").grid(row=5, column=0, padx=5, pady=5)
-entry_precio = tk.Entry(frame_form)
-entry_precio.grid(row=5, column=1)
+def activar(btn, indicador):
+    for b in botones:
+        b.config(bg=COLOR_SIDEBAR, fg=COLOR_TEXT)
+    for i in indicadores:
+        i.config(bg=COLOR_SIDEBAR)
 
-tk.Label(frame_form, text="Stock").grid(row=6, column=0, padx=5, pady=5)
-entry_stock = tk.Entry(frame_form)
-entry_stock.grid(row=6, column=1)
+    btn.config(bg=COLOR_SIDEBAR_ACTIVE, fg="white")
+    indicador.config(bg=COLOR_ACCENT)
 
-boton_guardar = tk.Button(
-    frame_inventario,
-    text="Guardar teléfono",
-    command=guardar_producto
-)
-boton_guardar.pack(pady=10)
+def crear_boton(texto, comando):
+    cont = tk.Frame(sidebar, bg=COLOR_SIDEBAR)
+    cont.pack(fill="x")
 
-# TABLA INVENTARIO
+    indicador = tk.Frame(cont, width=5, bg=COLOR_SIDEBAR)
+    indicador.pack(side="left", fill="y")
 
-frame_tabla = tk.Frame(frame_inventario)
-frame_tabla.pack(pady=10)
+    btn = tk.Label(
+        cont,
+        text="   " + texto,
+        bg=COLOR_SIDEBAR,
+        fg=COLOR_TEXT,
+        font=(FONT, 13, "bold"),
+        anchor="w",
+        padx=25,
+        pady=16,
+        cursor="hand2"
+    )
+    btn.pack(side="left", fill="both", expand=True)
 
-columnas = (
-    "ID",
-    "Nombre",
-    "Marca",
-    "Modelo",
-    "Capacidad",
-    "Color",
-    "Precio",
-    "Stock"
-)
+    def enter(e):
+        if btn["bg"] != COLOR_SIDEBAR_ACTIVE:
+            btn.config(bg=COLOR_SIDEBAR_HOVER)
 
-tabla = ttk.Treeview(frame_tabla, columns=columnas, show="headings")
+    def leave(e):
+        if btn["bg"] != COLOR_SIDEBAR_ACTIVE:
+            btn.config(bg=COLOR_SIDEBAR)
 
-for col in columnas:
-    tabla.heading(col, text=col)
-    tabla.column(col, width=90)
+    def click(e):
+        activar(btn, indicador)
+        comando()
 
-tabla.pack()
+    btn.bind("<Enter>", enter)
+    btn.bind("<Leave>", leave)
+    btn.bind("<Button-1>", click)
 
-boton_menu = tk.Button(
-    frame_inventario,
-    text="Volver al menú",
-    command=lambda: mostrar_frame(frame_menu)
-)
-boton_menu.pack(pady=10)
+    botones.append(btn)
+    indicadores.append(indicador)
 
-# ---------------- MODULO VENTAS ---------------- #
+    return btn, indicador
 
-titulo_ventas = tk.Label(
-    frame_ventas,
-    text="Módulo de Ventas",
-    font=("Arial", 18)
-)
-titulo_ventas.pack(pady=20)
-
-texto = tk.Label(
-    frame_ventas,
-    text="Aquí irá el sistema de ventas a crédito",
-    font=("Arial", 12)
-)
-texto.pack(pady=10)
-
-boton_menu2 = tk.Button(
-    frame_ventas,
-    text="Volver al menú",
-    command=lambda: mostrar_frame(frame_menu)
-)
-boton_menu2.pack(pady=20)
+btn_inicio, ind1 = crear_boton("Inicio", lambda: mostrar(frame_menu))
+btn_inv, ind2 = crear_boton("Inventario", lambda: mostrar(frame_inv))
+btn_ventas, ind3 = crear_boton("Ventas", lambda: mostrar(frame_ventas))
 
 # ---------------- INICIO ---------------- #
 
-mostrar_productos()
-mostrar_frame(frame_menu)
+mostrar(frame_menu)
+activar(btn_inicio, ind1)
 
 ventana.mainloop()
