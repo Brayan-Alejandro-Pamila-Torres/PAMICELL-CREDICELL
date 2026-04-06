@@ -89,6 +89,29 @@ def crear_frame_ventas(parent):
     def actualizar_combo_imei():
         combo_imei["values"] = [p[3] for p in productos_disponibles()]
 
+    def filtrar_imei(event=None):
+        texto = imei_var.get()
+
+        lista = [str(p[3]) for p in productos_disponibles()]
+        coincidencias = [imei for imei in lista if imei.startswith(texto)]
+
+        combo_imei["values"] = coincidencias
+
+        if event and event.keysym in ("BackSpace", "Delete"):
+            return
+
+        if texto == "":
+            actualizar_combo_imei()
+            return
+
+        if coincidencias:
+            primer = coincidencias[0]
+
+            if texto != primer:
+                imei_var.set(primer)
+                combo_imei.icursor(len(texto))
+                combo_imei.select_range(len(texto), tk.END)
+
     def seleccionar_imei(event=None):
         for p in productos_disponibles():
             if p[3] == imei_var.get():
@@ -177,7 +200,7 @@ def crear_frame_ventas(parent):
     ttk.Entry(form, textvariable=nombre_cliente_var).grid(row=1, column=2, padx=10, sticky="ew")
 
     crear_label("IMEI", 2, 0)
-    combo_imei = ttk.Combobox(form, textvariable=imei_var, state="readonly")
+    combo_imei = ttk.Combobox(form, textvariable=imei_var)
     combo_imei.grid(row=3, column=0, padx=10, sticky="ew")
 
     crear_label("TAG", 2, 1)
@@ -220,6 +243,7 @@ def crear_frame_ventas(parent):
     ttk.Entry(form, textvariable=plazo_var).grid(row=9, column=2, padx=10, sticky="ew")
 
     combo_imei.bind("<<ComboboxSelected>>", seleccionar_imei)
+    combo_imei.bind("<KeyRelease>", filtrar_imei)
 
     for var in (enganche_consola_var, enganche_cliente_var, venta_var, costo_equipo_var):
         var.trace_add("write", recalcular)
@@ -495,6 +519,7 @@ def crear_frame_ventas(parent):
         eliminar_venta(venta_id)
         cargar_tabla()
         actualizar_combo_imei()
+        
 
     btn_eliminar = tk.Button(
         acciones_tabla,
