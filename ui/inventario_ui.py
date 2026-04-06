@@ -156,6 +156,21 @@ def crear_frame_inventario(parent):
 
     columnas = ("ID", "FECHA", "PROVEEDOR", "IMEI", "MODELO", "PRECIO", "RAM", "ALM", "STOCK", "ESTATUS")
 
+    style = ttk.Style()
+
+    style.configure(
+        "Treeview.Heading",
+        background="#0f172a",  
+        foreground="white",   
+        font=("Segoe UI", 10, "bold")
+    )
+
+    style.map(
+        "Treeview.Heading",
+        background=[("active", "#1e293b")],  
+        foreground=[("active", "white")]   
+    )
+
     tabla = ttk.Treeview(tabla_wrap, columns=columnas, show="headings")
 
     anchos = {
@@ -361,9 +376,9 @@ def crear_frame_inventario(parent):
     btn_guardar = tk.Button(
         barra_acciones,
         text="Guardar equipo",
-        bg="#f3d971",
+        bg="#e2c346",
         fg="#111827",
-        activebackground="#f5d060",
+        activebackground="#f1c234",
         activeforeground="#111827",
         font=("Segoe UI", 11, "bold"),
         relief="flat",
@@ -395,9 +410,9 @@ def crear_frame_inventario(parent):
     btn_editar = tk.Button(
         acciones_tabla,
         text="Editar",
-        bg="#92a9da",
+        bg="#2563eb",
         fg="white",
-        activebackground="#89a6f5",
+        activebackground="#1f52c0",
         activeforeground="white",
         font=("Segoe UI", 10, "bold"),
         relief="flat",

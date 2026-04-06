@@ -72,7 +72,7 @@ def crear_frame_ventas(parent):
     enganche_consola_var = tk.StringVar(value="0")
     enganche_cliente_var = tk.StringVar(value="0")
     venta_var = tk.StringVar(value="0")
-    plataforma_var = tk.StringVar(value="LOCAL")
+    plataforma_var = tk.StringVar(value="PAYJOY")
     ganancia_plataforma_var = tk.StringVar(value="0")
     ganancia_total_var = tk.StringVar(value="0")
     pagara_plataforma_var = tk.StringVar(value="0")
@@ -223,7 +223,7 @@ def crear_frame_ventas(parent):
     ttk.Combobox(
         form,
         textvariable=plataforma_var,
-        values=["LOCAL", "MERCADO LIBRE", "FACEBOOK"],
+        values=["PAYJOY", "CREDICELL", "KREDIYA", "LES PAGO"],
         state="readonly"
     ).grid(row=7, column=0, padx=10, sticky="ew")
 
@@ -267,9 +267,9 @@ def crear_frame_ventas(parent):
     tk.Button(
         barra_vendedores,
         text="Agregar vendedor",
-        bg="#92a9da",
+        bg="#2563eb",
         fg="white",
-        activebackground="#89a6f5",
+        activebackground="#1f52c0",
         activeforeground="white",
         font=("Segoe UI", 10, "bold"),
         relief="flat",
@@ -358,9 +358,9 @@ def crear_frame_ventas(parent):
     btn_guardar = tk.Button(
         barra_acciones,
         text="Registrar venta",
-        bg="#f3d971",
+        bg="#e2c346",
         fg="#111827",
-        activebackground="#f5d060",
+        activebackground="#f1c234",
         activeforeground="#111827",
         font=("Segoe UI", 11, "bold"),
         relief="flat",
