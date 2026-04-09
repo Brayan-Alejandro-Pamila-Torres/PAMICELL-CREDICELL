@@ -13,8 +13,8 @@ def guardar_producto(data):
     # INSERT CORREGIDO (ahora incluye stock y estatus)
     cursor.execute("""
         INSERT INTO productos 
-        (fecha, proveedor, imei, modelo, precio_compra, ram, almacenamiento, stock, estatus)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (fecha, proveedor, imei, modelo, precio_compra, ram, almacenamiento, stock, estatus, iva)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data["fecha"],
         data["proveedor"],
@@ -24,7 +24,8 @@ def guardar_producto(data):
         data["ram"],
         data["alm"],
         data["stock"],      
-        data["estatus"]     
+        data["estatus"],
+        data["iva"] 
     ))
 
     conn.commit()
@@ -40,4 +41,4 @@ def obtener_productos():
     datos = cursor.fetchall()
 
     conn.close()
-    return datos
+    return datos 

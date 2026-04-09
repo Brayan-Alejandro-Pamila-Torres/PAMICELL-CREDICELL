@@ -26,7 +26,8 @@ def crear_tabla_productos():
         ram TEXT,
         almacenamiento TEXT,
         stock INTEGER DEFAULT 1,
-        estatus TEXT DEFAULT 'DISPONIBLE'
+        estatus TEXT DEFAULT 'DISPONIBLE',
+        iva REAL
     )
     """)
 

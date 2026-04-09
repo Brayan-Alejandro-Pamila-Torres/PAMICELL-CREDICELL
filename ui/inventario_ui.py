@@ -73,7 +73,7 @@ def crear_frame_inventario(parent):
     combo_ram = ttk.Combobox(
         form,
         textvariable=ram,
-        values=["4GB", "8GB", "16GB", "32GB", "64GB", "128GB", "256GB"],
+        values=["4GB", "8GB", "16GB", "32GB"],
         state="readonly",
         width=22
     )
@@ -118,6 +118,28 @@ def crear_frame_inventario(parent):
     barra_acciones = tk.Frame(card_form, bg="white")
     barra_acciones.pack(fill="x", padx=20, pady=(0, 18))
 
+    #campo IVA
+    entry_iva = ttk.Entry(form, width=24, state="readonly")
+    entry_iva.insert(0, "")
+    entry_iva.grid(row=5, column=2, padx=10, pady=(0, 8), sticky="ew"   )
+    ttk.Label(form, text="IVA", background="white", foreground="#334155", font=("Segoe UI", 10, "bold")).grid(row=4, column=2, sticky="w", padx=10, pady=(8, 4))
+
+    #funcion que calcula el iva automaticamente
+    def calcular_iva(event=None):
+        try:
+            precio = float(entry_precio.get())
+            iva = precio * 0.16
+
+            entry_iva.config(state="normal")
+            entry_iva.delete(0, tk.END)
+            entry_iva.insert(0, f"{iva:.2f}")
+            entry_iva.config(state="readonly")
+        except:
+            entry_iva.config(state="normal")
+            entry_iva.delete(0, tk.END)
+            entry_iva.config(state="readonly")
+    entry_precio.bind("<KeyRelease>", calcular_iva)
+
     # ---------------- TARJETA TABLA ---------------- #
 
     card_tabla = tk.Frame(cont, bg="white", bd=1, relief="solid")
@@ -154,7 +176,7 @@ def crear_frame_inventario(parent):
     tabla_wrap = tk.Frame(card_tabla, bg="white")
     tabla_wrap.pack(fill="both", expand=True, padx=20, pady=(0, 20))
 
-    columnas = ("ID", "FECHA", "PROVEEDOR", "IMEI", "MODELO", "PRECIO", "RAM", "ALM", "STOCK", "ESTATUS")
+    columnas = ("ID", "FECHA", "PROVEEDOR", "IMEI", "MODELO", "PRECIO", "RAM", "ALM", "STOCK", "ESTATUS", "IVA")
 
     style = ttk.Style()
 
@@ -183,7 +205,8 @@ def crear_frame_inventario(parent):
         "RAM": 90,
         "ALM": 100,
         "STOCK": 60,
-        "ESTATUS": 120
+        "ESTATUS": 120,
+        "IVA": 60
     }
 
     for col in columnas:
@@ -229,7 +252,7 @@ def crear_frame_inventario(parent):
             tabla.insert(
                 "",
                 tk.END,
-                values=(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9])
+                values=(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10])
             )
 
     def guardar():
@@ -247,6 +270,7 @@ def crear_frame_inventario(parent):
             if producto_editando_id["valor"] is None:
                 stock = int(entry_stock.get())
                 estatus = "DISPONIBLE" if stock > 0 else "AGOTADO"
+                iva = precio * 0.16
                 data = {
                     "fecha": entry_fecha.get(),
                     "proveedor": proveedor.get(),
@@ -256,7 +280,8 @@ def crear_frame_inventario(parent):
                     "ram": ram.get(),
                     "alm": almacenamiento.get(),
                     "stock": stock,
-                    "estatus": estatus
+                    "estatus": estatus,
+                    "iva": iva
                 }
 
                 res = guardar_producto(data)
