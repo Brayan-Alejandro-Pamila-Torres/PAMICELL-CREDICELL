@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+
+# Entornos
+venv/
+.env
+
+# Build
+build/
+dist/
+
+# Base de datos
+*.db
+
+# Archivos del sistema
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
