@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import hashlib
 
 # ---------------- CONEXIÓN ---------------- #
 
@@ -84,10 +85,31 @@ def crear_tabla_vendedores():
     conn.commit()
     conn.close()
 
+# ---------------- SEGURIDAD ---------------- #
 
+def crear_tabla_config():
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS configuracion (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        clave TEXT,
+        valor TEXT
+    )
+    """)
+    
+    cursor.execute("SELECT * FROM configuracion WHERE clave = 'password_sistema'")
+    if not cursor.fetchone():
+        password_inicial = hashlib.sha256("1234".encode()).hexdigest()
+        cursor.execute("INSERT INTO configuracion (clave, valor) VALUES (?, ?)", 
+                       ("password_sistema", password_inicial))
+    
+    conn.commit()
+    conn.close()
 # ---------------- INIT ---------------- #
 
 def inicializar_db():
     crear_tabla_productos()
     crear_tabla_ventas()
     crear_tabla_vendedores()
+    crear_tabla_config()
