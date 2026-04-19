@@ -115,8 +115,10 @@ def crear_frame_ventas(parent):
     def seleccionar_imei(event=None):
         for p in productos_disponibles():
             if p[3] == imei_var.get():
-                equipo_var.set(p[4])          # modelo
-                costo_equipo_var.set(str(p[5]))  # precio_compra
+                equipo_var.set(p[4])          
+                #costo_equipo_var.set(str(p[5]))
+
+                costo_equipo_var.set("0") 
                 recalcular()
                 break
 
@@ -228,16 +230,16 @@ def crear_frame_ventas(parent):
     ).grid(row=7, column=0, padx=10, sticky="ew")
 
     crear_label("Ganancia plataforma", 6, 1)
-    ttk.Entry(form, textvariable=ganancia_plataforma_var, state="readonly").grid(row=7, column=1, padx=10, sticky="ew")
+    ttk.Entry(form, textvariable=ganancia_plataforma_var, state="nomral").grid(row=7, column=1, padx=10, sticky="ew")
 
     crear_label("Ganancia total", 6, 2)
-    ttk.Entry(form, textvariable=ganancia_total_var, state="readonly").grid(row=7, column=2, padx=10, sticky="ew")
+    ttk.Entry(form, textvariable=ganancia_total_var, state="normal").grid(row=7, column=2, padx=10, sticky="ew")
 
     crear_label("Pagará plataforma", 8, 0)
-    ttk.Entry(form, textvariable=pagara_plataforma_var, state="readonly").grid(row=9, column=0, padx=10, sticky="ew")
+    ttk.Entry(form, textvariable=pagara_plataforma_var, state="normal").grid(row=9, column=0, padx=10, sticky="ew")
 
     crear_label("Costo del equipo", 8, 1)
-    ttk.Entry(form, textvariable=costo_equipo_var, state="readonly").grid(row=9, column=1, padx=10, sticky="ew")
+    ttk.Entry(form, textvariable=costo_equipo_var, state="normal").grid(row=9, column=1, padx=10, sticky="ew")
 
     crear_label("Plazo (semanas)", 8, 2)
     ttk.Entry(form, textvariable=plazo_var).grid(row=9, column=2, padx=10, sticky="ew")
@@ -245,8 +247,8 @@ def crear_frame_ventas(parent):
     combo_imei.bind("<<ComboboxSelected>>", seleccionar_imei)
     combo_imei.bind("<KeyRelease>", filtrar_imei)
 
-    for var in (enganche_consola_var, enganche_cliente_var, venta_var, costo_equipo_var):
-        var.trace_add("write", recalcular)
+    #for var in (enganche_consola_var, enganche_cliente_var, venta_var, costo_equipo_var):
+        #var.trace_add("write", recalcular)
 
     # ---------------- BARRA VENDEDORES ---------------- #
 
