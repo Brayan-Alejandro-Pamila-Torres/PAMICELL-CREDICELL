@@ -19,7 +19,7 @@ def crear_frame_seguridad(parent, callback_bloqueo):
     card = tk.Frame(cuerpo, bg="white", bd=1, relief="solid")
     card.place(relx=0.5, rely=0.4, anchor="center", width=550, height=520)
 
-    tk.Label(card, text="🔒 Configuración de Acceso", bg="white", fg="#0f172a", font=(FONT, 14, "bold")).pack(pady=(20, 10))
+    tk.Label(card, text="Configuración de Acceso", bg="white", fg="#0f172a", font=(FONT, 14, "bold")).pack(pady=(20, 10))
 
     # --- Función para crear campos con "Ojo" e Iconos ---
     def crear_campo(label_text, icon):
