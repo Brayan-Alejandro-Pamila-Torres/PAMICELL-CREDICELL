@@ -24,10 +24,10 @@ def crear_frame_ventas(parent):
 
     tk.Label(
         header,
-        text="Módulo de Ventas",
+        text="Modulo de Ventas",
         bg="#1f2022",
         fg="white",
-        font=("Segoe UI", 18, "bold")
+        font=("Ubuntu", 18, "bold")
     ).pack(expand=True)
 
     # ---------------- CUERPO ---------------- #

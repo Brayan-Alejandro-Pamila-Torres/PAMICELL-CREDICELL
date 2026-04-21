@@ -253,7 +253,7 @@ def cerrar_sesion():
 btn_inicio, ind1 = crear_boton("Inicio", lambda: mostrar(frame_menu))
 btn_inv, ind2 = crear_boton("Inventario", lambda: mostrar(frame_inv))
 btn_ventas, ind3 = crear_boton("Ventas", lambda: mostrar(frame_ventas))
-btn_seguridad, ind4 = crear_boton("Seguridad", lambda: mostrar(frame_seguridad))
+btn_seguridad, ind4 = crear_boton("Configuracion", lambda: mostrar(frame_seguridad))
 
 # --- ESPACIADOR ---
 spacer = tk.Frame(sidebar, bg=COLOR_SIDEBAR)

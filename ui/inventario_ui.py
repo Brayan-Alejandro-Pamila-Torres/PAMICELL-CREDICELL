@@ -15,10 +15,10 @@ def crear_frame_inventario(parent):
 
     tk.Label(
         header,
-        text="Gestión de Inventario",
+        text="Gestion de Inventario",
         bg="#1f2022",
         fg="white",
-        font=("Segoe UI", 18, "bold")
+        font=("Ubuntu", 18, "bold")
     ).pack(expand=True)
 
     # ---------------- CONTENIDO ---------------- #
