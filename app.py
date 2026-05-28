@@ -8,6 +8,7 @@ from ui.ventas_ui import crear_frame_ventas
 from ui.seguridad_ui import crear_frame_seguridad
 from ui.datos_ui import crear_frame_datos  
 from services.seguridad_service import validar_password
+from ui.reportes_ui import crear_frame_reportes # <-- 1. IMPORTACIÓN AGREGADA
 
 # Inicializar base de datos MySQL en Docker
 inicializar_db()
@@ -134,8 +135,9 @@ def recargar_combo_ventas_externo():
 
 frame_datos = crear_frame_datos(contenido, recargar_combo_ventas_externo)
 frame_seguridad = crear_frame_seguridad(contenido, mostrar_bloqueo)
+frame_reportes = crear_frame_reportes(contenido) # <-- 2. INSTANCIA DE REPORTES AGREGADA
 
-for f in (frame_menu, frame_inv, frame_ventas, frame_datos, frame_seguridad):
+for f in (frame_menu, frame_inv, frame_ventas, frame_datos, frame_reportes, frame_seguridad): # <-- 3. AGREGADO AL BUCLE GRID
     f.grid(row=0, column=0, sticky="nsew")
 
 # ---------------- CONSTRUCCIÓN SIDEBAR MENÚ ---------------- #
@@ -151,7 +153,7 @@ indicadores = []
 
 def activar(btn, indicador):
     for b in botones: b.config(bg=COLOR_SIDEBAR, fg=COLOR_TEXT)
-    for i in indicadores: i.config(bg=COLOR_SIDEBAR)
+    for i in indicadores: i.config(bg=COLOR_SIDEBAR) if 'indicators' in locals() else [ind.config(bg=COLOR_SIDEBAR) for ind in indicadores]
     btn.config(bg=COLOR_SIDEBAR_ACTIVE, fg="white")
     indicador.config(bg=COLOR_ACCENT)
 
@@ -177,6 +179,7 @@ btn_inicio, ind1 = crear_boton("Inicio", lambda: mostrar(frame_menu))
 btn_inv, ind2 = crear_boton("Registrar Inventario", lambda: mostrar(frame_inv))
 btn_ventas, ind3 = crear_boton("Nueva Venta", lambda: mostrar(frame_ventas))
 btn_datos, ind_datos = crear_boton("Administrar Datos", lambda: mostrar(frame_datos))
+btn_reportes, ind_reportes = crear_boton("Reportes Relacionales", lambda: mostrar(frame_reportes)) # <-- 4. BOTÓN DE REPORTES AGREGADO
 btn_seguridad, ind4 = crear_boton("Configuración", lambda: mostrar(frame_seguridad))
 
 # --- ESPACIADOR DINÁMICO ---
