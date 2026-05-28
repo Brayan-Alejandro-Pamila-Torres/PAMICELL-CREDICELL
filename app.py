@@ -176,8 +176,10 @@ def activar(btn, indicador):
         b.config(bg=COLOR_SIDEBAR, fg=COLOR_TEXT)
     for ind in indicadores: 
         ind.config(bg=COLOR_SIDEBAR)
-    btn.config(bg=COLOR_SIDEBAR_ACTIVE, fg="white")
-    indicador.config(bg=COLOR_ACCENT)
+    if btn: # Verificación por si se activa desde fuera
+        btn.config(bg=COLOR_SIDEBAR_ACTIVE, fg="white")
+    if indicador:
+        indicador.config(bg=COLOR_ACCENT)
 
 def crear_boton(texto, comando):
     cont = tk.Frame(sidebar, bg=COLOR_SIDEBAR)
@@ -185,7 +187,7 @@ def crear_boton(texto, comando):
     indicador = tk.Frame(cont, width=5, bg=COLOR_SIDEBAR)
     indicador.pack(side="left", fill="y")
 
-    btn = tk.Label(cont, text="   " + texto, bg=COLOR_SIDEBAR, fg=COLOR_TEXT, font=(FONT, 13, "bold"), anchor="w", padx=25, pady=14, cursor="hand2")
+    btn = tk.Label(cont, text="   " + texto, bg=COLOR_SIDEBAR, fg=COLOR_TEXT, font=(FONT, 13, "bold"), anchor="w", padx=25, pady=12, cursor="hand2")
     btn.pack(side="left", fill="both", expand=True)
 
     btn.bind("<Enter>", lambda e: btn.config(bg=COLOR_SIDEBAR_HOVER) if btn["bg"] != COLOR_SIDEBAR_ACTIVE else None)
@@ -196,7 +198,7 @@ def crear_boton(texto, comando):
     indicadores.append(indicador)
     return btn, indicador
 
-# Instanciar botones del menú lateral izquierdo
+# Instanciar botones de operación estándar del menú
 btn_inicio, ind1 = crear_boton("Inicio", lambda: mostrar(frame_menu))
 btn_inv, ind2 = crear_boton("Registrar Inventario", lambda: mostrar(frame_inv))
 btn_ventas, ind3 = crear_boton("Nueva Venta", lambda: mostrar(frame_ventas))
@@ -204,11 +206,7 @@ btn_datos, ind_datos = crear_boton("Administrar Datos", lambda: mostrar(frame_da
 btn_reportes, ind_reportes = crear_boton("Reportes Relacionales", lambda: mostrar(frame_reportes)) 
 btn_seguridad, ind4 = crear_boton("Configuración", lambda: mostrar(frame_seguridad))
 
-# --- ESPACIADOR DINÁMICO ---
-spacer = tk.Frame(sidebar, bg=COLOR_SIDEBAR)
-spacer.pack(fill="both", expand=True)
-
-# --- BOTÓN CERRAR SESIÓN ---
+# --- BOTÓN CERRAR SESIÓN (UBICADO DEBAJO DE CONFIGURACIÓN) ---
 def cerrar_sesion():
     if messagebox.askyesno("Confirmar", "¿Estás seguro de que deseas cerrar la sesión?"):
         mostrar_bloqueo()
@@ -216,10 +214,20 @@ def cerrar_sesion():
         mostrar(frame_menu)
 
 cont_cerrar = tk.Frame(sidebar, bg=COLOR_SIDEBAR)
-cont_cerrar.pack(fill="x", side="bottom", pady=20)
+cont_cerrar.pack(fill="x", pady=(15, 0))
 
-btn_cerrar = tk.Label(cont_cerrar, text="   Cerrar Sesión", bg="#dc2626", fg="white", font=(FONT, 12, "bold"), anchor="w", padx=25, pady=12, cursor="hand2")
-btn_cerrar.pack(fill="x", padx=20, pady=10)
+btn_cerrar = tk.Label(
+    cont_cerrar, 
+    text="     ❌ Cerrar Sesión", 
+    bg="#dc2626", 
+    fg="white", 
+    font=(FONT, 12, "bold"), 
+    anchor="w", 
+    padx=25, 
+    pady=10, 
+    cursor="hand2"
+)
+btn_cerrar.pack(fill="x", padx=20)
 btn_cerrar.bind("<Enter>", lambda e: btn_cerrar.config(bg="#b91c1c"))
 btn_cerrar.bind("<Leave>", lambda e: btn_cerrar.config(bg="#dc2626"))
 btn_cerrar.bind("<Button-1>", lambda e: cerrar_sesion())

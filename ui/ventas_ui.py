@@ -1,3 +1,5 @@
+# ui/ventas_ui.py
+import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime
@@ -5,9 +7,10 @@ from services.ventas_service import registrar_venta, obtener_vendedores, agregar
 from services.inventario_service import obtener_productos
 
 def crear_frame_ventas(parent):
+    # Frame principal contenedor
     frame = tk.Frame(parent, bg="#f8fafc")
 
-    # ---------------- HEADER ---------------- #
+    # ---------------- HEADER FIXED (SIEMPRE VISIBLE) ---------------- #
     header = tk.Frame(frame, bg="#1f2022", height=70)
     header.pack(fill="x")
     header.pack_propagate(False)
@@ -20,7 +23,42 @@ def crear_frame_ventas(parent):
         font=("Ubuntu", 18, "bold")
     ).pack(expand=True)
 
-    cuerpo = tk.Frame(frame, bg="#f8fafc")
+    # ---------------- CONTENEDOR CON SCROLLBAR ---------------- #
+    # Creamos un Canvas para permitir el desplazamiento vertical
+    canvas = tk.Canvas(frame, bg="#f8fafc", highlightthickness=0)
+    scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+    
+    # Este frame interno contendrá todo el diseño original
+    cuerpo_scrollable = tk.Frame(canvas, bg="#f8fafc")
+    
+    # Configurar el Canvas para que renderice el frame interno
+    window_id = canvas.create_window((0, 0), window=cuerpo_scrollable, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+    
+    # Empaquetamos el sistema de scrollbar a la derecha y el canvas al centro
+    scrollbar.pack(side="right", fill="y")
+    canvas.pack(side="left", fill="both", expand=True)
+
+    # Lógica adaptativa para ajustar el ancho automáticamente al redimensionar la ventana
+    def al_redimensionar_canvas(event):
+        canvas.itemconfig(window_id, width=event.width)
+    canvas.bind("<Configure>", al_redimensionar_canvas)
+
+    def actualizar_region_scroll(event):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+    cuerpo_scrollable.bind("<Configure>", actualizar_region_scroll)
+
+    # SOPORTE PARA LA RUEDA DEL MOUSE (Soporta Linux Mint y Windows)
+    def_on_mousewheel = lambda event: canvas.yview_scroll(int(-1 * (event.delta / 120)), "units") if os.name == 'nt' else lambda event: canvas.yview_scroll(int(-1 * event.num), "units")
+    
+    # En Linux Mint (X11) se usan los eventos Button-4 y Button-5
+    canvas.bind_all("<Button-4>", lambda e: canvas.yview_scroll(-1, "units"))
+    canvas.bind_all("<Button-5>", lambda e: canvas.yview_scroll(1, "units"))
+    # En Windows se usa MouseWheel
+    canvas.bind_all("<MouseWheel>", lambda e: canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
+
+    # ---------------- CUERPO DEL FORMULARIO ---------------- #
+    cuerpo = tk.Frame(cuerpo_scrollable, bg="#f8fafc")
     cuerpo.pack(fill="both", expand=True, padx=24, pady=24)
 
     card_form = tk.Frame(cuerpo, bg="white", bd=1, relief="solid")
@@ -154,7 +192,7 @@ def crear_frame_ventas(parent):
     crear_label("VENTA", 4, 2)
     ttk.Entry(form, textvariable=venta_var).grid(row=5, column=2, padx=10, sticky="ew")
 
-    # RENGLÓN 4: PLATAFORMA, GANANCIA PAYJOY, GANANCIA TOTAL
+    # RENGLÓN 4: PLATAFORMA, GANANCIA PLATAFORMA, GANANCIA TOTAL
     crear_label("PLATAFORMA", 6, 0)
     ttk.Combobox(form, textvariable=plataforma_var, values=["PAYJOY", "CREDICELL", "KREDIYA", "LES PAGO"], state="readonly").grid(row=7, column=0, padx=10, sticky="ew")
     crear_label("GANANCIA PLATAFORMA", 6, 1)
@@ -182,6 +220,7 @@ def crear_frame_ventas(parent):
     tk.Button(barra_vendedores, text="Agregar", bg="#2563eb", fg="white", font=("Segoe UI", 9, "bold"), relief="flat", command=agregar_vendedor_ui, cursor="hand2", padx=10).pack(side="left", padx=5)
     tk.Button(barra_vendedores, text="Eliminar", bg="#dc2626", fg="white", font=("Segoe UI", 9, "bold"), relief="flat", command=eliminar_vendedor_ui, cursor="hand2", padx=10).pack(side="left")
 
+    # ---------------- BARRA DE ACCIONES FINALES (BOTÓN GUARDAR SEGURO) ---------------- #
     barra_acciones = tk.Frame(card_form, bg="white")
     barra_acciones.pack(fill="x", padx=20, pady=(10, 20))
 
@@ -203,7 +242,7 @@ def crear_frame_ventas(parent):
     def guardar():
         try:
             if not imei_var.get() or not nombre_cliente_var.get().strip() or not vendedor_var.get().strip():
-                messagebox.showwarning("Campos obligatorios", "Determina el IMEI, Cliente y Vendedor para facturar.")
+                messagebox.showwarning("Campos obligatorios", "Determina el IMEI, Cliente y Vendedor para continuar con la venta.")
                 return
             data = {
                 "fecha_venta": fecha_var.get(),
@@ -228,6 +267,19 @@ def crear_frame_ventas(parent):
             refrescar()
         except Exception as e:
             messagebox.showerror("Error", f"Fallo de persistencia: {e}")
+
+    # Botón de Guardar Operación fijado visiblemente al final del layout interno
+    tk.Button(
+        barra_acciones, 
+        text="💾 REGISTRAR NUEVA VENTA / FINANCIAMIENTO", 
+        bg="#2563eb", 
+        fg="white", 
+        font=("Segoe UI", 12, "bold"), 
+        relief="flat", 
+        command=guardar, 
+        cursor="hand2", 
+        pady=10
+    ).pack(fill="x", expand=True)
 
     def refrescar():
         refrescar_vendedores()
